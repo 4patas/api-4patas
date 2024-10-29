@@ -1,0 +1,67 @@
+-- Criação do banco de dados
+CREATE DATABASE SistemaAdocao;
+USE SistemaAdocao;
+
+-- Tabela Usuario
+CREATE TABLE Usuario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100),
+    email VARCHAR(100),
+    senha VARCHAR(100),
+    tipo VARCHAR(50),
+    endereco VARCHAR(200),
+    telefone VARCHAR(15),  -- Novo campo para telefone
+    cidade VARCHAR(100)    -- Novo campo para cidade
+);
+
+-- Tabela Animal
+CREATE TABLE Animal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100),
+    idade FLOAT,           -- Mudança para FLOAT
+    especie VARCHAR(50),
+    raca VARCHAR(50),
+    descricao TEXT,
+    idUsuario INT,
+    porte VARCHAR(50),     -- Novo campo para porte
+    sexo VARCHAR(10),      -- Novo campo para sexo
+    imagem VARCHAR(255),   -- Novo campo para a URL da imagem
+    dataCriacao DATE,      -- Novo campo para data de criação
+    FOREIGN KEY (idUsuario) REFERENCES Usuario(id)
+);
+
+-- Tabela Anuncio
+CREATE TABLE Anuncio (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    dataCriacao DATE,
+    idAnimal INT,
+    idUsuario INT,
+    FOREIGN KEY (idAnimal) REFERENCES Animal(id),
+    FOREIGN KEY (idUsuario) REFERENCES Usuario(id)
+);
+
+-- Tabela ListaAdocao
+CREATE TABLE ListaAdocao (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idAnimal INT,
+    FOREIGN KEY (idAnimal) REFERENCES Animal(id)
+);
+
+-- Inserindo dados na tabela Usuario
+INSERT INTO Usuario (nome, email, senha, tipo, endereco, telefone, cidade) VALUES
+('João Silva', 'joao.silva@example.com', 'senha123', 'adotante', 'Rua A, 123', '12345-6789', 'Porto Alegre'),
+('Maria Oliveira', 'maria.oliveira@example.com', 'senha456', 'adotante', 'Rua B, 456', '98765-4321', 'São Paulo'),
+('Carlos Santos', 'carlos.santos@example.com', 'senha789', 'adotante', 'Rua C, 789', '45678-1234', 'Belo Horizonte');
+
+-- Inserindo dados na tabela Animal
+INSERT INTO Animal (nome, idade, especie, raca, descricao, idUsuario, porte, sexo, imagem, dataCriacao) VALUES
+('Rex', 2.5, 'Cachorro', 'Labrador', 'Cão amigável e brincalhão.', 1, 'Grande', 'Macho', 'https://images.unsplash.com/photo-1601758003839-512c0f4159e5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', '2024-01-01'),
+('Mia', 1.0, 'Gato', 'Siamês', 'Gata carinhosa e tranquila.', 1, 'Pequeno', 'Fêmea', 'https://images.unsplash.com/photo-1515125786-9347aff3c549?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', '2024-01-02'),
+('Bolt', 3.2, 'Cachorro', 'Bulldog', 'Cão forte e leal.', 2, 'Médio', 'Macho', 'https://images.unsplash.com/photo-1523229572700-6af211a82d73?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', '2024-01-03'),
+('Luna', 4.0, 'Gato', 'Persa', 'Gata elegante e afetuosa.', 2, 'Pequeno', 'Fêmea', 'https://images.unsplash.com/photo-1583404283135-ee11fa80b2a2?q=80&w=2032&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', '2024-01-04'),
+('Simba', 1.5, 'Cachorro', 'Poodle', 'Cão inteligente e brincalhão.', 3, 'Médio', 'Macho', 'https://images.unsplash.com/photo-1503774620960-c9c62fe1c6ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', '2024-01-05'),
+('Toby', 5.0, 'Cachorro', 'Golden Retriever', 'Cão amigável e excelente com crianças.', 1, 'Grande', 'Macho', 'https://images.unsplash.com/photo-1513549054-cb3611a004fe?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', '2024-01-06'),
+('Nina', 3.8, 'Gato', 'Sphynx', 'Gata carinhosa e sociável.', 3, 'Pequeno', 'Fêmea', 'https://images.unsplash.com/photo-1606831213906-946a98399c87?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', '2024-01-07'),
+('Leo', 2.0, 'Cachorro', 'Beagle', 'Cão curioso e ativo.', 2, 'Médio', 'Macho', 'https://images.unsplash.com/photo-1693121106047-8bc4c64761a6?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', '2024-01-08'),
+('Bella', 1.2, 'Gato', 'Maine Coon', 'Gata brincalhona e amigável.', 1, 'Grande', 'Fêmea', 'https://images.unsplash.com/photo-1723028075357-a2ce23ce6505?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', '2024-01-09'),
+('Max', 4.5, 'Cachorro', 'Boxer', 'Cão protetor e leal.', 3, 'Médio', 'Macho', 'https://images.unsplash.com/photo-1719930902292-b9425b5e37bc?q=80&w=1848&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', '2024-01-10');
