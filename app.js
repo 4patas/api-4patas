@@ -380,7 +380,7 @@ app.get('/user/profile', verifyToken, (req, res) => {
 });
 
 // Iniciar o servidor
-const PORT = 21072;
+const PORT = 443;
 // const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
