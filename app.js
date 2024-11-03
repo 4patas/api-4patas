@@ -11,7 +11,7 @@ require('dotenv').config();
 
 const app = express();
 app.use(bodyParser.json());
-app.use(express.json()); // Middleware para parsear JSON
+app.use(express.json()); 
 app.use(cors());
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -19,8 +19,8 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Configuração do banco de dados
 const db = mysql.createConnection({
     host: 'mysql.4patas.kinghost.net',
-    user: '4patas',      // Altere conforme necessário
-    password: 'Renan1502',      // Altere conforme necessário
+    user: '4patas',      
+    password: 'Renan1502',      
     database: '4patas'
 });
 
@@ -35,7 +35,7 @@ db.connect((err) => {
 
 // Middleware de autenticação para proteger rotas
 const verifyToken = (req, res, next) => {
-    const token = req.headers['authorization']?.split(' ')[1]; // Espera que o token esteja no formato "Bearer token"
+    const token = req.headers['authorization']?.split(' ')[1];
 
     if (!token) {
         return res.status(401).send({ message: 'Token não fornecido' });
@@ -46,28 +46,26 @@ const verifyToken = (req, res, next) => {
         if (err) {
             return res.status(403).send({ message: 'Token inválido' });
         }
-        req.userId = decoded.id; // Armazena o ID do usuário na requisição
-        next(); // Chama o próximo middleware ou rota
+        req.userId = decoded.id; 
+        next();
     });
 };
 
 // Configuração do multer para armazenar arquivos
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, 'src/images/pets')); // Pasta onde as imagens serão salvas
+        cb(null, path.join(__dirname, 'src/images/pets'));
     },
     filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9); // Gera um nome único
-        cb(null, uniqueSuffix + path.extname(file.originalname)); // Usa a extensão original
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9); 
+        cb(null, uniqueSuffix + path.extname(file.originalname)); 
     }
 });
 
 const upload = multer({
-    limits: { fileSize: 2 * 1024 * 1024 } // Limite de 2MB
-}).single('imagem'); // Campo do arquivo deve ser 'imagem'
+    limits: { fileSize: 2 * 1024 * 1024 } 
+}).single('imagem');
 
-
-// Rota para adicionar um novo animal (protegida)
 // Rota para adicionar um novo animal (protegida)
 app.post('/animais', verifyToken, (req, res) => {
     upload(req, res, (err) => {
@@ -75,14 +73,11 @@ app.post('/animais', verifyToken, (req, res) => {
             console.error("Erro no upload da imagem:", err);
             return res.status(500).send({ message: 'Erro no upload da imagem.' });
         }
-
         if (!req.file) {
             return res.status(400).send({ message: 'Imagem não enviada. Por favor, selecione uma imagem.' });
         }
-
         const { nome, idade, especie, raca, descricao, idUsuario, porte, sexo } = req.body;
-        const imagemData = req.file.buffer; // Captura o buffer de dados da imagem
-
+        const imagemData = req.file.buffer;
         const query = 'INSERT INTO Animal (nome, idade, especie, raca, descricao, idUsuario, porte, sexo, imagem, dataCriacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         
         db.query(query, [nome, idade, especie, raca, descricao, idUsuario, porte, sexo, imagemData, new Date().toISOString().slice(0, 10)], (err, result) => {
@@ -95,19 +90,19 @@ app.post('/animais', verifyToken, (req, res) => {
     });
 });
 
-
+// Rota esqueci minha senha
 app.post('/esqueci-minha-senha', async (req, res) => { 
     const { email } = req.body;
-    console.log('Corpo da requisição:', req.body); // Log do corpo da requisição
-    console.log('E-mail recebido:', email); // Log do e-mail recebido
+    console.log('Corpo da requisição:', req.body); 
+    console.log('E-mail recebido:', email); 
 
     const query = 'SELECT * FROM Usuario WHERE email = ?';
     db.query(query, [email], (err, result) => {
         if (err) {
-            console.error('Erro ao consultar o banco de dados:', err); // Log do erro
+            console.error('Erro ao consultar o banco de dados:', err); 
             return res.status(500).send(err);
         }
-        console.log('Resultado da consulta:', result); // Log do resultado da consulta
+        console.log('Resultado da consulta:', result); 
 
         if (result.length === 0) {
             return res.status(404).send({ message: 'Usuário não encontrado' });
@@ -116,7 +111,6 @@ app.post('/esqueci-minha-senha', async (req, res) => {
         const user = result[0];
         const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1h' });
 
-        // Configurações do Nodemailer
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -129,12 +123,12 @@ app.post('/esqueci-minha-senha', async (req, res) => {
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Redefinição de Senha',
-            text: `Clique no link para redefinir sua senha: http://localhost:3000/redefinir-senha/${token}`,
+            text: `Clique no link para redefinir sua senha: https://4patas.github.io/${token}`,
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
-                console.error('Erro ao enviar e-mail:', error); // Log do erro ao enviar e-mail
+                console.error('Erro ao enviar e-mail:', error);
                 return res.status(500).send({ message: 'Erro ao enviar e-mail' });
             }
             res.status(200).send({ message: 'E-mail de redefinição de senha enviado!' });
@@ -168,15 +162,12 @@ app.post('/redefinir-senha', async (req, res) => {
 app.post('/register', async (req, res) => {
     const { nome, email, senha, tipo, endereco, telefone, cidade } = req.body;
 
-    // Verificar se a senha foi fornecida
     if (!senha) {
         return res.status(400).send({ message: 'Senha não fornecida' });
     }
 
     try {
-        // Criptografar a senha
         const hashedPassword = await bcrypt.hash(senha, 10);
-        
         const query = 'INSERT INTO Usuario (nome, email, senha, tipo, endereco, telefone, cidade) VALUES (?, ?, ?, ?, ?, ?, ?)';
         db.query(query, [nome, email, hashedPassword, tipo, endereco, telefone, cidade], (err, result) => {
             if (err) {
@@ -209,7 +200,6 @@ app.post('/login', (req, res) => {
             return res.status(401).send({ message: 'Senha incorreta' });
         }
 
-        // Gera o token JWT
         const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
         const userId = user.id;
         const userName = user.nome;
@@ -228,7 +218,7 @@ app.get('/usuarios', verifyToken, (req, res) => {
     });
 });
 
-// READ - Obter um usuário específico por ID
+//Obter um usuário específico por ID
 app.get('/usuarios/:id', (req, res) => {
     const { id } = req.params;
     const query = 'SELECT * FROM Usuario WHERE id = ?';
@@ -242,7 +232,6 @@ app.get('/usuarios/:id', (req, res) => {
         res.status(200).json(result[0]);
     });
 });
-
 
 // Rota protegida - Obter dados do usuário autenticado
 app.get('/meusdados', verifyToken, (req, res) => {
@@ -260,8 +249,7 @@ app.get('/meusdados', verifyToken, (req, res) => {
     });
 });
 
-// Rota para listar animais (alterada para permitir acesso sem autenticação)
-// Rota para listar animais com imagem em Base64
+// Rota para listar animais
 app.get('/animais', (req, res) => {
     const query = 'SELECT id, nome, idade, especie, raca, descricao, idUsuario, porte, sexo, imagem, dataCriacao FROM Animal';
 
@@ -269,19 +257,15 @@ app.get('/animais', (req, res) => {
         if (err) {
             return res.status(500).send(err);
         }
-
-        // Converte a imagem para Base64
         const animaisComImagens = results.map(animal => {
             return {
                 ...animal,
                 imagem: animal.imagem ? Buffer.from(animal.imagem).toString('base64') : null
             };
         });
-
         res.status(200).json(animaisComImagens);
     });
 });
-
 
 // Endpoint para buscar animais de um usuário específico
 app.get('/animais/usuario/:idUsuario', verifyToken, (req, res) => {
@@ -292,8 +276,6 @@ app.get('/animais/usuario/:idUsuario', verifyToken, (req, res) => {
         if (err) {
             return res.status(500).send(err);
         }
-
-        // Converte o campo de imagem para Base64
         const animalsWithBase64Images = results.map(animal => {
             if (animal.imagem) {
                 animal.imagem = animal.imagem.toString('base64');
@@ -304,7 +286,6 @@ app.get('/animais/usuario/:idUsuario', verifyToken, (req, res) => {
         res.status(200).json(animalsWithBase64Images);
     });
 });
-
 
 // Rota para atualizar um animal (protegida)
 app.put('/animais/:id', verifyToken, (req, res) => {
@@ -347,7 +328,6 @@ app.delete('/animais/:id', verifyToken, (req, res) => {
     });
 });
 
-
 // Rota para atualizar o perfil do usuário autenticado
 app.put('/user/profile', verifyToken, (req, res) => { 
     const userId = req.userId;
@@ -356,19 +336,14 @@ app.put('/user/profile', verifyToken, (req, res) => {
     if (!nome || !email || !cidade || !telefone) {
         return res.status(400).send({ message: 'Todos os campos são obrigatórios.' });
     }
-
     const query = 'UPDATE Usuario SET nome = ?, email = ?, cidade = ?, telefone = ? WHERE id = ?';
-    
     db.query(query, [nome, email, cidade, telefone, userId], (err, result) => {
         if (err) {
             return res.status(500).send({ message: 'Erro ao atualizar perfil' });
         }
-
         if (result.affectedRows === 0) {
             return res.status(404).send({ message: 'Usuário não encontrado' });
         }
-
-        // Retorna os dados atualizados do usuário
         res.status(200).json({ nome, email, cidade, telefone });
     });
 });
@@ -376,30 +351,21 @@ app.put('/user/profile', verifyToken, (req, res) => {
 // Rota para excluir conta de usuário
 app.delete('/user/delete', verifyToken, (req, res) => {
     const userId = req.userId; // Obtém o ID do usuário autenticado
-
-    // Query para excluir o usuário do banco de dados
     const query = 'DELETE FROM Usuario WHERE id = ?';
-
     db.query(query, [userId], (err, result) => {
         if (err) {
             return res.status(500).send({ message: 'Erro ao excluir conta' });
         }
-
-        // Verifica se o usuário foi encontrado e excluído
         if (result.affectedRows === 0) {
             return res.status(404).send({ message: 'Usuário não encontrado' });
         }
-
-        // Retorna uma resposta de sucesso
         res.status(200).send({ message: 'Conta excluída com sucesso!' });
     });
 });
 
 // Endpoint para obter o perfil do usuário autenticado
 app.get('/user/profile', verifyToken, (req, res) => {
-    const userId = req.userId; // O ID do usuário autenticado, extraído do token
-
-    // Query para buscar os dados do usuário no banco de dados
+    const userId = req.userId;
     const query = 'SELECT id, nome, email, cidade, telefone FROM Usuario WHERE id = ?';
     
     db.query(query, [userId], (err, result) => {
@@ -409,14 +375,14 @@ app.get('/user/profile', verifyToken, (req, res) => {
         if (result.length === 0) {
             return res.status(404).send({ message: 'Usuário não encontrado' });
         }
-        
-        // Retorna os dados do perfil do usuário
         res.status(200).json(result[0]);
     });
 });
 
 // Iniciar o servidor
-const PORT = process.env.PORT || 3001;
+const PORT = 21072;
+// const PORT = process.env.PORT || 3001;
+
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
